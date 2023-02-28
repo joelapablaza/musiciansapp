@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -19,11 +20,11 @@ namespace API
     public class Startup
     {
         private readonly string _MyCors = "MyCors";
-        private readonly IConfiguration _config;
+        private readonly IConfiguration _configiguration;
 
-        public Startup(IConfiguration config)
+        public Startup(IConfiguration configiguration)
         {
-            _config = config;
+            _configiguration = configiguration;
 
         }
 
@@ -35,10 +36,14 @@ namespace API
 
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+                options.UseSqlite(_configiguration.GetConnectionString("Default"));
             });
-            services.AddControllers();
+            services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddAutoMapper(typeof(Program).Assembly);
+            services.AddControllers(); // autogenerado
             services.AddCors(options =>
+
             {
                 options.AddPolicy(name: _MyCors, builder =>
                 {

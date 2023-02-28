@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
+using API.Entities.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
