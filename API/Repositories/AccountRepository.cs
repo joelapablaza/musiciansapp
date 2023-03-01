@@ -5,7 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using API.Data;
-using API.Entities.Domain;
+using API.DTO;
+using API.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
@@ -17,14 +19,15 @@ namespace API.Repositories
             _context = context;
 
         }
-        public async Task<AppUser> Register(string username, string password)
+
+        public async Task<AppUser> Register(RegisterDTO register)
         {
             using var hmac = new HMACSHA512();
 
             var user = new AppUser
             {
-                UserName = username,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password)),
+                UserName = register.Username.ToLower(),
+                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(register.Password)),
                 PasswordSalt = hmac.Key
             };
 
@@ -32,6 +35,36 @@ namespace API.Repositories
             await _context.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<AppUser> Login(LoginDTO loginDTO)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.UserName == loginDTO.Username.ToLower());
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
+
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != user.PasswordHash[i])
+                {
+                    return null;
+                }
+            }
+
+            return user;
+        }
+
+        public async Task<bool> UserExists(string username)
+        {
+            return await _context.Users.AnyAsync(x => x.UserName == username.ToLower());
         }
     }
 }

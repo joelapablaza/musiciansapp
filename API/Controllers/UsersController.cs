@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using API.Data;
-using API.Entities.Domain;
+using API.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Repositories;
 using AutoMapper;
+using API.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -24,6 +26,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetUsersAsync()
         {
             var users = await _usersRepository.GetUsers();
@@ -33,11 +36,12 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            var usersDTO = _mapper.Map<Entities.DTO.AppUser>(users);
+            var usersDTO = _mapper.Map<List<AppUserDTO>>(users);
 
             return Ok(usersDTO);
         }
 
+        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<AppUser>> GetUserAsync(int id)
         {
@@ -48,7 +52,7 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            var userDTO = _mapper.Map<Entities.DTO.AppUser>(user);
+            var userDTO = _mapper.Map<AppUserDTO>(user);
 
             return Ok(userDTO);
         }

@@ -6,9 +6,8 @@ using API.Entities;
 
 namespace API.Repositories
 {
-    public interface IUsersRepository
+    public interface ITokenService
     {
-        Task<IEnumerable<AppUser>> GetUsers();
-        Task<AppUser> GetUser(int id);
+        string CreateToken(AppUser user);
     }
 }
