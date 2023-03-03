@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using API.Extensions;
+using API.Middleware;
 
 namespace API
 {
@@ -46,6 +47,8 @@ namespace API
                     //for when you're running on localhost
                     builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                     .AllowAnyHeader().AllowAnyMethod();
+                    //builder.WithOrigins("https://localhost:4200")
+                    //.AllowAnyHeader().AllowAnyMethod();
 
 
                     //builder.WithOrigins("url from where you're trying to do the requests")
@@ -57,10 +60,12 @@ namespace API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            // if (env.IsDevelopment())
+            // {
+            //     app.UseDeveloperExceptionPage();
+            // }
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
