@@ -11,6 +11,6 @@ namespace API.Repositories
     {
         Task<AppUser> Register(RegisterDTO register);
         Task<bool> UserExists(string username);
-        Task<AppUser> Login(LoginDTO loginDTO);
+        Task<UserDTO> Login(LoginDTO loginDTO);
     }
 }

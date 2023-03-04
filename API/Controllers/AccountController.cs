@@ -15,12 +15,10 @@ namespace API.Controllers
     public class AccountController : BaseApiController
     {
         private readonly IAccountRepository _accountRepository;
-        private readonly ITokenService _tokenService;
 
-        public AccountController(IAccountRepository accountRepository, ITokenService tokenService)
+        public AccountController(IAccountRepository accountRepository)
         {
             _accountRepository = accountRepository;
-            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -43,7 +41,7 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUserDTO>> LoginAsync(LoginDTO loginDTO)
+        public async Task<ActionResult<UserDTO>> LoginAsync(LoginDTO loginDTO)
         {
             var user = await _accountRepository.Login(loginDTO);
 
@@ -52,11 +50,7 @@ namespace API.Controllers
                 return Unauthorized("Invalid username or password");
             }
 
-            return new AppUserDTO
-            {
-                Username = user.UserName,
-                // Token = _tokenService.CreateToken(user)
-            };
+            return Ok(user);
         }
     }
 }
