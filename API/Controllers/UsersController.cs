@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class UsersController : BaseApiController
     {
         private readonly IUsersRepository _usersRepository;
@@ -25,36 +26,47 @@ namespace API.Controllers
 
         }
 
+        // GET ALL USERS
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetUsersAsync()
+        public async Task<ActionResult<IEnumerable<AppUserDTO>>> GetUsersAsync()
         {
-            var users = await _usersRepository.GetUsers();
+            var users = await _usersRepository.GetAppUserDTOsAsync();
 
             if (users == null)
             {
                 return NotFound();
             }
 
-            var usersDTO = _mapper.Map<List<AppUserDTO>>(users);
-
-            return Ok(usersDTO);
+            return Ok(users);
         }
 
-        [Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<AppUser>> GetUserAsync(int id)
+        // [HttpGet("{id:int}")]
+        // public async Task<ActionResult<AppUser>> GetUserByIdAsync(int id)
+        // {
+        //     var user = await _usersRepository.GetUserByIdAsync(id);
+
+        //     if (user == null)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     var userDTO = _mapper.Map<AppUserDTO>(user);
+
+        //     return Ok(userDTO);
+        // }
+
+        // GET USER BY USERNAME
+        [HttpGet("{username}")]
+        public async Task<ActionResult<AppUser>> GetUser(string username)
         {
-            var user = await _usersRepository.GetUser(id);
+            var user = await _usersRepository.GetAppUserDTOAsync(username);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var userDTO = _mapper.Map<AppUserDTO>(user);
-
-            return Ok(userDTO);
+            return Ok(user);
         }
     }
 }
