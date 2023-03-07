@@ -22,7 +22,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUserDTO>> Register(RegisterDTO register)
+        public async Task<ActionResult<UserDTO>> Register(RegisterDTO register)
         {
             var userIsTaken = await _accountRepository.UserExists(register.Username);
 
@@ -33,11 +33,7 @@ namespace API.Controllers
 
             var user = await _accountRepository.Register(register);
 
-            return new AppUserDTO
-            {
-                Username = user.UserName,
-                // Token = _tokenService.CreateToken(user)
-            };
+            return user;
         }
 
         [HttpPost("login")]

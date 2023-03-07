@@ -9,7 +9,7 @@ namespace API.Repositories
 {
     public interface IAccountRepository
     {
-        Task<AppUser> Register(RegisterDTO register);
+        Task<UserDTO> Register(RegisterDTO register);
         Task<bool> UserExists(string username);
         Task<UserDTO> Login(LoginDTO loginDTO);
     }
