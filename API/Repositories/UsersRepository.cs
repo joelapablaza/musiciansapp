@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTO;
 using API.Entities;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -59,11 +60,13 @@ namespace API.Repositories
         }
 
         // GET ALL APPUSERS DTOS
-        public async Task<IEnumerable<AppUserDTO>> GetAppUserDTOsAsync()
+        public async Task<PagedList<AppUserDTO>> GetAppUserDTOsAsync(UserParams userParams)
         {
-            return await _context.Users
+            var query = _context.Users
                 .ProjectTo<AppUserDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .AsNoTracking();
+
+            return await PagedList<AppUserDTO>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         // GET APP USER DTO
