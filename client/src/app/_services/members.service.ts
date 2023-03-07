@@ -1,9 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http'; // Importación de las dependencias necesarias
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'; // Importación de las dependencias necesarias
 import { Injectable } from '@angular/core'; // Importación del decorador Injectable para indicar que es un servicio
 import { of } from 'rxjs'; // Importación de la función of para trabajar con Observables
 import { map } from 'rxjs/operators'; // Importación de la función map para transformar los datos de un Observable
 import { environment } from 'src/environments/environment'; // Importación del archivo environment para obtener la URL del API
 import { Member } from '../_models/member'; // Importación del modelo Member
+import { PaginatedResult } from '../_models/pagination';
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +12,25 @@ import { Member } from '../_models/member'; // Importación del modelo Member
 export class MembersService {
   baseUrl = environment.apiUrl; // URL del API
   members: Member[] = []; // Array que contendrá los miembros
+  paginatedResult: PaginatedResult<Member[]> = new PaginatedResult<Member[]>();
 
   constructor(private http: HttpClient) { } // Se inyecta el HttpClient para hacer peticiones HTTP
 
-  getMembers() {
-    if (this.members.length > 0) return of(this.members); // Si ya se han obtenido los miembros, se devuelven
-    return this.http.get<Member[]>(this.baseUrl + 'users').pipe( // Si no, se hace una petición HTTP para obtenerlos
-      map(members => {
-        this.members = members; // Se asignan los miembros obtenidos al array members
-        return members;
+  getMembers(page?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+
+    if (page !== null && itemsPerPage !== null) {
+      params = params.append('pageNumber', page.toString());
+      params = params.append('pageSize', itemsPerPage.toString());
+    }
+    
+    return this.http.get<Member[]>(this.baseUrl + 'users', {observe: 'response', params}).pipe(
+      map(response => {
+        this.paginatedResult.result = response.body;
+        if (response.headers.get('Pagination') !== null) {
+          this.paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
+        }
+        return this.paginatedResult;
       })
     )
   }
