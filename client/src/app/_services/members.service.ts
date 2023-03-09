@@ -13,11 +13,18 @@ import { UserParams } from '../_models/userParams';
 export class MembersService {
   baseUrl = environment.apiUrl; // URL del API
   members: Member[] = []; // Array que contendrá los miembros
+  memberCache = new Map();
   
 
   constructor(private http: HttpClient) { } // Se inyecta el HttpClient para hacer peticiones HTTP
 
   getMembers(userParams: UserParams) {
+     var response = this.memberCache.get(Object.values(userParams).join('-'));
+     console.log(response)
+     if (response) {
+      return of(response);
+     }
+
     let params = this.getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
     params = params.append('minAge', userParams.minAge.toString());
     params = params.append('maxAge', userParams.maxAge.toString());
@@ -25,11 +32,23 @@ export class MembersService {
     params = params.append('orderBy', userParams.orderBy);
     
     return this.getPaginatedResult<Member[]>(this.baseUrl + 'users', params)
+      .pipe(map(response => {
+        this.memberCache.set(Object.values(userParams).join('-'), response);
+        return response;
+      }))
   }
 
   getMember(username: string) {
-    const member = this.members.find(x => x.username === username); // Se busca el miembro en el array members
-    if (member !== undefined) return of(member); // Si se encuentra, se devuelve
+    const member = [...this.memberCache.values()]
+      .reduce((arr, elem) => arr.concat(elem.result), [])
+      .find((member: Member) => member.username === username);
+
+    if (member) {
+      return of(member)
+    }
+
+    console.log(member);
+    
     return this.http.get<Member>(this.baseUrl + 'users/' + username); // Si no, se hace una petición HTTP para obtenerlo
   }
 
