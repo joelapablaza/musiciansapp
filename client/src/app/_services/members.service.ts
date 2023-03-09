@@ -1,11 +1,13 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'; // Importación de las dependencias necesarias
 import { Injectable } from '@angular/core'; // Importación del decorador Injectable para indicar que es un servicio
 import { of } from 'rxjs'; // Importación de la función of para trabajar con Observables
-import { map } from 'rxjs/operators'; // Importación de la función map para transformar los datos de un Observable
+import { map, take } from 'rxjs/operators'; // Importación de la función map para transformar los datos de un Observable
 import { environment } from 'src/environments/environment'; // Importación del archivo environment para obtener la URL del API
 import { Member } from '../_models/member'; // Importación del modelo Member
 import { PaginatedResult } from '../_models/pagination';
+import { User } from '../_models/user';
 import { UserParams } from '../_models/userParams';
+import { AccountService } from './account.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +16,32 @@ export class MembersService {
   baseUrl = environment.apiUrl; // URL del API
   members: Member[] = []; // Array que contendrá los miembros
   memberCache = new Map();
+  user: User;
+  userParams: UserParams;
   
 
-  constructor(private http: HttpClient) { } // Se inyecta el HttpClient para hacer peticiones HTTP
+  constructor(private http: HttpClient, private accountService: AccountService) { 
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      this.user = user;
+      this.userParams = new UserParams(user);
+    })
+  } // Se inyecta el HttpClient para hacer peticiones HTTP
+
+  getUserParams() {
+    return this.userParams;
+  }
+
+  setUserParams(params: UserParams) {
+    this.userParams = params;
+  }
+
+  resetUserParams() {
+    this.userParams = new UserParams(this.user);
+    return this.userParams
+  }
 
   getMembers(userParams: UserParams) {
      var response = this.memberCache.get(Object.values(userParams).join('-'));
-     console.log(response)
      if (response) {
       return of(response);
      }
@@ -46,8 +67,6 @@ export class MembersService {
     if (member) {
       return of(member)
     }
-
-    console.log(member);
     
     return this.http.get<Member>(this.baseUrl + 'users/' + username); // Si no, se hace una petición HTTP para obtenerlo
   }
