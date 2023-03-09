@@ -62,11 +62,29 @@ namespace API.Repositories
         // GET ALL APPUSERS DTOS
         public async Task<PagedList<AppUserDTO>> GetAppUserDTOsAsync(UserParams userParams)
         {
-            var query = _context.Users
-                .ProjectTo<AppUserDTO>(_mapper.ConfigurationProvider)
-                .AsNoTracking();
+            var query = _context.Users.AsQueryable();
 
-            return await PagedList<AppUserDTO>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+            query = query.Where(x => x.UserName != userParams.CurrentUsername);
+
+            if (userParams.Gender != "all")
+            {
+                query = query.Where(x => x.Gender == userParams.Gender);
+            }
+
+            var minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1);
+            var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
+
+            query = query.Where(x => x.DateOfBirth >= minDob && x.DateOfBirth <= maxDob);
+
+            query = userParams.OrderBy switch
+            {
+                "created" => query.OrderByDescending(u => u.Created),
+                _ => query.OrderByDescending(u => u.LastActive)
+            };
+
+            return await PagedList<AppUserDTO>.CreateAsync(query.ProjectTo<AppUserDTO>(_mapper
+                .ConfigurationProvider).AsNoTracking(),
+                userParams.PageNumber, userParams.PageSize);
         }
 
         // GET APP USER DTO

@@ -44,7 +44,7 @@
           alt="{{ user.username }}"
         />
         <a class="dropdown-toggle text-light ml-2" dropdownToggle
-          >Weolcome {{ user.username | titlecase }}</a
+          >Weolcome {{ user.knownAs | titlecase }}</a
         >
         <div class="dropdown-menu" *dropdownMenu>
           <a routerLink="/user/edit" class="dropdown-item">Edit Profile</a>

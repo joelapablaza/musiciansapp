@@ -36,6 +36,14 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUserDTO>>> GetUsersAsync([FromQuery] UserParams userParams)
         {
+            var user = await _usersRepository.GetUserByUsernameAsync(User.GetUsername());
+            userParams.CurrentUsername = user.UserName;
+
+            // if (string.IsNullOrEmpty(userParams.Gender))
+            // {
+            //     userParams.Gender = user.Gender == "male" ? "female" : "male";
+            // }
+
             var users = await _usersRepository.GetAppUserDTOsAsync(userParams);
 
             Response.AddPaginationHeader(users.CurrentPage,
