@@ -24,13 +24,13 @@
           <strong>Age:</strong>
           <p>{{ member.age }}</p>
         </div>
-        <div>
+        <!-- <div>
           <strong>Last Active:</strong>
-          <p>{{ member.lastActive }}</p>
-        </div>
+          <p>{{ member.lastActive | timeago }}</p>
+        </div> -->
         <div>
           <strong>Location since:</strong>
-          <p>{{ member.created }}</p>
+          <p>{{ member.created | date : "DD MMM YYYY" }}</p>
         </div>
       </div>
       <div class="card-footer">
