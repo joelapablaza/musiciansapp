@@ -37,15 +37,19 @@ namespace API.Repositories
 
             var result = await _userManager.CreateAsync(user, register.Password);
 
+            if (!result.Succeeded) return null;
+
+            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+
+            if (!roleResult.Succeeded) return null;
+
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user),
+                Token = await _tokenService.CreateToken(user),
                 KnownAs = user.KnownAs
                 // Gender = "all",
             };
-
-            if (!result.Succeeded) return null;
         }
 
         public async Task<UserDTO> Login(LoginDTO loginDTO)
@@ -66,7 +70,7 @@ namespace API.Repositories
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user),
+                Token = await _tokenService.CreateToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
                 KnownAs = user.KnownAs
                 // Gender = "all",
