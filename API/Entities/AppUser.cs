@@ -8,9 +8,8 @@ namespace API.Entities
 {
     public class AppUser
     {
-        // Analizar si se puede cambiar por un Guid
-        public int Id { get; set; } // usa exactamente el nombre Id, para despues poder usar Entity Framework
-        public string UserName { get; set; } // Usa exactamente el nombre UserName para despues poder usar ASP net Core Identity
+        public int Id { get; set; }
+        public string UserName { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
         public DateTime DateOfBirth { get; set; }
@@ -25,10 +24,7 @@ namespace API.Entities
         public string Country { get; set; }
         public ICollection<Photo> Photos { get; set; }
 
-        // Directamente lo creo proyectando desde el repositorios
-        // public int GetAge()
-        // {
-        //     return DateOfBirth.CalculateAge();
-        // }
+        public ICollection<UserLike> LikedByUsers { get; set; }
+        public ICollection<UserLike> LikedUsers { get; set; }
     }
 }
