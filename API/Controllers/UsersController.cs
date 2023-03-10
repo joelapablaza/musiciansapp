@@ -33,7 +33,6 @@ namespace API.Controllers
         }
 
         // GET ALL USERS
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUserDTO>>> GetUsersAsync([FromQuery] UserParams userParams)
         {
@@ -74,7 +73,6 @@ namespace API.Controllers
         // }
 
         // GET USER BY USERNAME
-        [Authorize(Roles = "Member")]
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<AppUser>> GetUser(string username)
         {
