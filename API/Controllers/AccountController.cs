@@ -33,6 +33,8 @@ namespace API.Controllers
 
             var user = await _accountRepository.Register(register);
 
+            if (user == null) return BadRequest("Please try again");
+
             return user;
         }
 
