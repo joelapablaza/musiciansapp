@@ -33,8 +33,10 @@ namespace API.SignalR
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
+
             var otherUser = httpContext.Request.Query["user"].ToString();
             var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
+
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
             var group = await AddToGroup(groupName);
             await Clients.Group(groupName).SendAsync("UpdatedGroup", group);
@@ -76,7 +78,6 @@ namespace API.SignalR
             var groupName = GetGroupName(sender.UserName, recipient.UserName);
 
             var group = await _messageRepository.GetMessageGroup(groupName);
-
             if (group.Connections.Any(x => x.Username == recipient.UserName))
             {
                 message.DateRead = DateTime.UtcNow;
@@ -92,7 +93,6 @@ namespace API.SignalR
             }
 
             _messageRepository.AddMessage(message);
-
             if (await _messageRepository.SaveAllAsync())
             {
                 await Clients.Group(groupName).SendAsync("NewMessage", _mapper.Map<MessageDTO>(message));
@@ -121,6 +121,7 @@ namespace API.SignalR
         {
             var group = await _messageRepository.GetGroupFromConnection(Context.ConnectionId);
             var connection = group.Connections.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
+
             _messageRepository.RemoveConnection(connection);
             if (await _messageRepository.SaveAllAsync()) return group;
 
