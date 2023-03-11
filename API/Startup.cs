@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.Data;
+using API.Extensions;
 using API.Repositories;
+using API.Middleware;
 using API.Services;
+using API.SignalR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,75 +19,53 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using API.Extensions;
-using API.Middleware;
 
 namespace API
 {
     public class Startup
     {
-        private readonly string _MyCors = "MyCors";
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _config;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration config)
         {
-            _configuration = configuration;
+            _config = config;
         }
 
-        // public IConfiguration Configuration { get; }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationServices(_configuration);
-            services.AddControllers(); // autogenerado
-            services.AddCors(options =>
-            {
-                options.AddPolicy(name: _MyCors, builder =>
-                {
-                    //for when you're running on localhost
-                    builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
-                    .AllowAnyHeader().AllowAnyMethod();
-                    //builder.WithOrigins("https://localhost:4200")
-                    //.AllowAnyHeader().AllowAnyMethod();
-
-
-                    //builder.WithOrigins("url from where you're trying to do the requests")
-                });
-            });
-            services.AddIdentityServices(_configuration);
+            services.AddApplicationServices(_config);
+            services.AddControllers();
+            services.AddCors();
+            services.AddIdentityServices(_config);
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // if (env.IsDevelopment())
-            // {
-            //     app.UseDeveloperExceptionPage();
-            // }
-
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            //app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200")); // For 5.0 API
-
-            app.UseCors(_MyCors);
+            app.UseCors(x => x.AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .WithOrigins("https://localhost:4200"));
 
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<PresenceHub>("hubs/presence");
+                // endpoints.MapHub<MessageHub>("hubs/message");
             });
         }
     }
 }
+
