@@ -48,7 +48,7 @@ namespace API
             //  if (env.IsDevelopment())
             // {
             //     app.UseDeveloperExceptionPage();
-            // }
+            // } Para que se use hasta que configure al exception middleware
 
             app.UseMiddleware<ExceptionMiddleware>();
 
