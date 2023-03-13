@@ -13,7 +13,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav me-auto">
         <ng-container *ngIf="currentUser$ | async">
           <li class="nav-item">
             <a class="nav-link" routerLink="/users" routerLinkActive="active"
@@ -45,10 +45,11 @@
 
       <div class="dropdown" *ngIf="currentUser$ | async as user" dropdown>
         <img
+          class="img-circle rounded-circle"
           src="{{ user.photoUrl || './assets/user.png' }}"
           alt="{{ user.username }}"
         />
-        <a class="dropdown-toggle text-light ml-2" dropdownToggle
+        <a class="dropdown-toggle text-light ms-2 text-decoration-none" dropdownToggle
           >Weolcome {{ user.knownAs || user.username | titlecase }}</a
         >
         <div class="dropdown-menu" *dropdownMenu>
@@ -60,20 +61,20 @@
 
       <form
         #loginform="ngForm"
-        class="form-inline mt-2 mt-md-0 ml-auto"
+        class="d-flex mt-2 mt-md-0"
         (ngSubmit)="login()"
         autocomplete="off"
         *ngIf="(currentUser$ | async) === null"
       >
         <input
-          class="form-control mr-sm-2"
+          class="form-control me-sm-2"
           type="text"
           placeholder="Username"
           name="username"
           [(ngModel)]="model.username"
         />
         <input
-          class="form-control mr-sm-2"
+          class="form-control me-sm-2"
           type="password"
           placeholder="Password"
           name="password"
