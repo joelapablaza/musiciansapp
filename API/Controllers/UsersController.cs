@@ -61,7 +61,9 @@ namespace API.Controllers
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<AppUser>> GetUser(string username)
         {
-            var user = await _unitOfWork.UsersRepository.GetAppUserDTOAsync(username);
+            var currenUsername = User.GetUsername();
+            var user = await _unitOfWork.UsersRepository.GetAppUserDTOAsync(username, 
+                isCurrentUser: currenUsername == username);
 
             if (user == null)
             {
@@ -98,13 +100,9 @@ namespace API.Controllers
             var photo = new Photo
             {
                 Url = result.SecureUrl.AbsoluteUri,
-                PublicId = result.PublicId
+                PublicId = result.PublicId,
+                IsApproved = false
             };
-
-            if (user.Photos.Count == 0)
-            {
-                photo.IsMain = true;
-            }
 
             user.Photos.Add(photo);
 

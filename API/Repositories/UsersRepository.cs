@@ -82,12 +82,16 @@ namespace API.Repositories
         }
 
         // GET APP USER DTO
-        public async Task<AppUserDTO> GetAppUserDTOAsync(string username)
+        public async Task<AppUserDTO> GetAppUserDTOAsync(string username, bool? isCurrentUser)
         {
-            return await _context.Users
+            var query = _context.Users
                 .Where(x => x.UserName == username)
                 .ProjectTo<AppUserDTO>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
+                .AsQueryable();
+
+            if ((bool)isCurrentUser) query = query.IgnoreQueryFilters();
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<string> GetUserGender(string username)
@@ -96,6 +100,15 @@ namespace API.Repositories
                     .Where(x => x.UserName == username)
                     .Select(x => x.Gender)
                     .FirstOrDefaultAsync();
+        }
+
+        public async Task<AppUser> GetUserByPhotoId(int photoId)
+        {
+            return await _context.Users
+            .Include(p => p.Photos)
+            .IgnoreQueryFilters()
+            .Where(p => p.Photos.Any(p => p.Id == photoId))
+            .FirstOrDefaultAsync();
         }
     }
 }
